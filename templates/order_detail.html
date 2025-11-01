@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>รายละเอียดออเดอร์ | SweetDash Bakery</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-pink-50 to-yellow-50 text-gray-800 flex flex-col">
+
+    <!-- Navbar -->
+    <header class="bg-white/80 backdrop-blur border-b border-pink-200 shadow-sm">
+        <div class="max-w-5xl mx-auto px-4 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex items-baseline gap-2">
+                <h1 class="text-xl font-bold text-pink-600">🍰 SweetDash Bakery</h1>
+                <span class="text-xs bg-pink-100 text-pink-600 px-2 py-0.5 rounded-full border border-pink-200">
+                    เข้าสู่ระบบแล้วเป็น {{ username }}
+                </span>
+            </div>
+
+            <nav class="flex items-center gap-4 mt-3 sm:mt-0 text-sm">
+                <a class="text-gray-600 hover:text-pink-600 transition" href="{{ url_for('dashboard') }}">เมนูสินค้า</a>
+                <a class="text-gray-600 hover:text-pink-600 transition" href="{{ url_for('cart') }}">ตะกร้า</a>
+                <a class="text-gray-600 hover:text-pink-600 transition font-semibold"
+                    href="{{ url_for('orders') }}">ออเดอร์</a>
+
+                <a href="{{ url_for('logout') }}"
+                    class="font-medium bg-pink-500 hover:bg-pink-600 text-white px-3 py-1.5 rounded-lg shadow">
+                    ออกจากระบบ
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Flash -->
+    <section class="max-w-5xl mx-auto px-4 mt-4 w-full">
+        {% with msgs = get_flashed_messages(with_categories=true) %}
+        {% if msgs %}
+        <div class="mb-4 space-y-2">
+            {% for cat, msg in msgs %}
+            <div class="rounded-lg border px-4 py-3 text-sm
+            {% if cat == 'success' %}
+              bg-green-50 border-green-300 text-green-700
+            {% elif cat == 'error' %}
+              bg-red-50 border-red-300 text-red-700
+            {% else %}
+              bg-yellow-50 border-yellow-300 text-yellow-700
+            {% endif %}">
+                <strong class="font-semibold">{{ cat|capitalize }}:</strong> {{ msg }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+    </section>
+
+    <main class="flex-1 max-w-5xl mx-auto px-4 py-8 w-full">
+        <h2 class="text-2xl font-extrabold text-pink-700 drop-shadow mb-6 text-center">
+            รายละเอียดคำสั่งซื้อ #{{ order.id }} 🧾
+        </h2>
+
+        <div class="bg-white rounded-xl border border-pink-100 shadow p-4 mb-6">
+            <div class="text-sm text-gray-600">
+                วันที่สั่งซื้อ: {{ order.created_at }}
+            </div>
+            <div class="text-xl font-bold text-pink-600 mt-2">
+                ยอดรวมทั้งบิล: ฿{{ "%.0f"|format(order.total) }}
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            {% for it in items %}
+            <div
+                class="bg-white rounded-xl border border-pink-100 shadow p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                    <div class="text-gray-800 font-semibold text-lg">
+                        {{ it.name_snapshot }}
+                    </div>
+                    <div class="text-sm text-gray-500">
+                        ราคา/ชิ้น: ฿{{ "%.0f"|format(it.price_snapshot) }}
+                    </div>
+                    <div class="text-sm text-gray-500">
+                        จำนวน: {{ it.qty }} ชิ้น
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-pink-600 font-bold text-lg">
+                        ฿{{ "%.0f"|format(it.line_total) }}
+                    </div>
+                    <div class="text-[11px] text-gray-400">
+                        รวมรายการนี้
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="text-center mt-8">
+            <a href="{{ url_for('orders') }}" class="inline-block text-pink-600 font-medium hover:underline text-sm">
+                ← กลับไปดูรายการออเดอร์ทั้งหมด
+            </a>
+        </div>
+    </main>
+
+    <footer class="border-t border-pink-200 bg-white/70 backdrop-blur py-6 text-center text-xs text-gray-500">
+        © 2025 SweetDash Bakery | ทำสดทุกวัน ส่งด่วนใกล้ร้าน
+    </footer>
+
+</body>
+
+</html>

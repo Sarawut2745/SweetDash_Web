@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>ร้านเค้กอร่อย | Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gradient-to-br from-pink-50 to-yellow-50 min-h-screen text-gray-800">
+    <!-- Navbar -->
+    <header class="bg-white/80 backdrop-blur border-b border-pink-200 shadow-sm">
+        <div class="max-w-5xl mx-auto px-4 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex items-baseline gap-2">
+                <h1 class="text-xl font-bold text-pink-600">🍰 SweetDash Bakery</h1>
+                <span class="text-xs bg-pink-100 text-pink-600 px-2 py-0.5 rounded-full border border-pink-200">
+                    เข้าสู่ระบบแล้วเป็น {{ username }}
+                </span>
+            </div>
+
+            <nav class="flex items-center gap-4 mt-3 sm:mt-0">
+                <a class="text-sm text-gray-600 hover:text-pink-600 transition" href="{{ url_for('dashboard') }}">
+                    หน้าแรก
+                </a>
+
+                <a class="text-sm text-gray-600 hover:text-pink-600 transition" href="{{ url_for('cart') }}">
+                    ตะกร้าของฉัน
+                </a>
+
+                <a class="text-sm text-gray-600 hover:text-pink-600 transition" href="{{ url_for('orders') }}">
+                    ออเดอร์
+                </a>
+
+                <a href="{{ url_for('logout') }}"
+                    class="text-sm font-medium bg-pink-500 hover:bg-pink-600 text-white px-3 py-1.5 rounded-lg shadow">
+                    ออกจากระบบ
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Flash messages -->
+    <section class="max-w-5xl mx-auto px-4 mt-4">
+        {% with msgs = get_flashed_messages(with_categories=true) %} {% if msgs %}
+        <div class="space-y-2">
+            {% for cat, msg in msgs %}
+            <div
+                class="rounded-lg border px-4 py-3 text-sm {% if cat == 'success' %} bg-green-50 border-green-300 text-green-700 {% elif cat == 'error' %} bg-red-50 border-red-300 text-red-700 {% else %} bg-yellow-50 border-yellow-300 text-yellow-700 {% endif %}">
+                <strong class="font-semibold">{{ cat|capitalize }}:</strong> {{ msg }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %} {% endwith %}
+    </section>
+
+    <!-- Hero -->
+    <section class="max-w-5xl mx-auto px-4 mt-8 text-center">
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-pink-700 drop-shadow">
+            เมนูเค้กโฮมเมด ประจำวันนี้ 🍓
+        </h2>
+        <p class="text-gray-600 text-sm sm:text-base mt-2 max-w-2xl mx-auto">
+            วัตถุดิบสดใหม่ หวานน้อย ทำวันต่อวัน พร้อมส่งด่วน 💕
+        </p>
+    </section>
+
+    <!-- Product list (dynamic) -->
+    <main class="max-w-5xl mx-auto px-4 mt-8 pb-16">
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {% for p in products %}
+            <div
+                class="bg-white rounded-2xl border border-pink-100 shadow hover:shadow-lg transition overflow-hidden flex flex-col">
+                <!-- แสดงภาพจริง -->
+                <div class="bg-pink-50 h-48 flex items-center justify-center overflow-hidden">
+                    {% if p.image_url %}
+                    <img src="{{ p.image_url }}" alt="{{ p.name }}"
+                        class="w-full h-full object-cover hover:scale-105 transition duration-300" />
+                    {% else %}
+                    <div class="text-6xl">🍰</div>
+                    {% endif %}
+                </div>
+
+                <div class="p-4 flex flex-col flex-1">
+                    <!-- ชื่อสินค้า + badge ถ้ามี -->
+                    <div class="flex items-start justify-between gap-2">
+                        <h3 class="font-semibold text-lg text-gray-800">{{ p.name }}</h3>
+                        {% if p.badge %}
+                        <span
+                            class="text-[10px] leading-none bg-pink-100 text-pink-600 border border-pink-300 rounded-full px-2 py-1">
+                            {{ p.badge }}
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <!-- คำอธิบาย -->
+                    <p class="text-sm text-gray-600 mt-1 flex-1">{{ p.description }}</p>
+
+                    <!-- สต็อก -->
+                    <p class="text-xs text-gray-400 mt-2">
+                        สินค้าคงเหลือ: {{ p.stock }} ชิ้น
+                    </p>
+
+                    <!-- ราคา + ปุ่ม -->
+                    <div class="mt-4 flex items-end justify-between">
+                        <div>
+                            <div class="text-pink-600 font-bold text-xl">
+                                ฿{{ "%.0f"|format(p.price) }}
+                            </div>
+
+                            {% if p.old_price %}
+                            <div class="text-xs text-gray-400 line-through">
+                                ฿{{ "%.0f"|format(p.old_price) }}
+                            </div>
+                            {% else %}
+                            <div class="text-xs text-transparent select-none">.</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- ปุ่มใส่ตะกร้า -->
+                        <form method="POST" action="/add_to_cart" class="inline">
+                            <input type="hidden" name="product_id" value="{{ p.id }}" />
+                            <button
+                                class="bg-pink-500 hover:bg-pink-600 text-white text-sm font-medium px-3 py-2 rounded-lg shadow disabled:opacity-40"
+                                {% if p.stock|int <="0" %}disabled{% endif %}>
+                                เพิ่มใส่ตะกร้า
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+
+    <footer class="border-t border-pink-200 bg-white/70 backdrop-blur py-6 text-center text-xs text-gray-500">
+        © 2025 SweetDash Bakery | ทำสดทุกวัน ส่งด่วนใกล้ร้าน
+    </footer>
+</body>
+
+</html>
